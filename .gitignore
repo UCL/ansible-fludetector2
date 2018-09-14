@@ -1,8 +1,9 @@
+hosts.ini
+.vagrant/
+
 .DS_Store
 *.m
 *.mat
-*.iso
-installationKey.txt
-license.txt
 FluDetectorModel-*.tar.gz
+*.rpm
 

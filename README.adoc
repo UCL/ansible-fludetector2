@@ -6,29 +6,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-= centos74-matlab-fludetector
+= ansible-fludetector2
 
 This Ansible playbook provisions a CentOS 7.4 machine with a single-node instance of the FluDetector app (https://github.com/UCL/fludetector-flask)
 
 == Requirements
 
 - Ansible (version 2.4.2) - https://www.ansible.com/
-- Matlab (version R2017a) - https://uk.mathworks.com/products/matlab.html
+- Octave 4.x for CentOS - rpm archives available
 - FluDetector model artifacts (version 2018.04) - tarball archive available by request
 
-=== Matlab
+=== Octave
 
-The playbook installs Matlab from the DVD iso files. Make sure the following files are present in the playbook directory:
-
-- `R2017a_glnxa64_dvd1.iso`
-- `R2017a_glnxa64_dvd2.iso`
-- `installationKey.txt` (https://uk.mathworks.com/help/install/ug/install-and-activate-without-an-internet-connection.html)
-- `license.txt` (http://uk.mathworks.com/help/install/ug/install-license-manager-using-a-file-installation-key.html)
-
-[NOTE]
-====
-The `license.txt` file is required for networked installations of Matlab. Edit the playbook if using a different installation method for Matlab.
-====
+The playbook installs Octave from the rpm file. Make sure the file `octave-4.2.2-6.el7.centos.1.x86_64.rpm` is present in the playbook directory:
 
 == Installation
 
@@ -51,6 +41,16 @@ The web interface is available on http://localhost:10080/
 
 == Configuration of FluDetector model
 
+=== Initial configuration
+
+A script is provided to configure the application
+
+(as root)
+....
+cd /opt/fludetector
+./scripts/init.sh
+....
+
 === Install model data in SQLite instance
 
 An SQL script with all the parameters required to run the model is provided in the tarball archive.
@@ -71,6 +71,16 @@ sudo ./scripts/run.sh runmodel 1 --start [yyyy-mm-dd] --end [yyyy-mm-dd]
 === Start scheduler for calculation of model scores
 
 Once the calculation of scores for past dates is completed, start the scheduler to run these calculations automatically on a daily basis.
+
+Start supervisor daemon
 ....
-sudo supervisorctl restart fludetector fludetector-google
+sudo systemctl start supervisord
+....
+
+Check status of the status of the FluDetector app components in Supervisor, and restart if not running or appear as failed.
+
+....
+sudo supervisorctl status
+sudo supervisorctl restart fludetector
+sudo supervisorctl restart fludetector-google
 ....
